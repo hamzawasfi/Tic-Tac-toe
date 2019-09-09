@@ -11,7 +11,6 @@ import java.util.Random;
 
 import javax.imageio.ImageIO;
 
-import Gaame.Game;
 import Gaame.AI.AI;
 import Gaame.AI.AILevel;
 import Gaame.Utils.ImageUtils;
@@ -121,6 +120,16 @@ public class LevelManager {
 				vsPc = true;
 
 				aiLevel = new AILevel();
+				
+				AILevel.oPressed = false;
+				AILevel.xPressed = false;
+				AILevel.loseScore = 0;
+				AILevel.winScore = 0;
+				aiLevel.player1Score.setText("player1's score is : " + AILevel.winScore + " | " + AILevel.loseScore);
+				
+				for (int i = 0; i < canvas.columns.size(); i++) {
+					canvas.columns.get(i).pc = true;
+				}
 			}
 		});
 		buttonComputer.setText("VS computer");
@@ -163,20 +172,50 @@ public class LevelManager {
 					panel.addComponent(player1Hint);
 				panel.components.remove(player1Hintlbl);
 				if (!vsPc) {
-					new Game();
+					//new Game();
+					canvas.clearCanvas();
+					
+					player1Score = 0;
+					player1Win.setText("player1's score is : " + player1Score);
+					player2Score = 0;
+					player2Win.setText("player2's score is : " + player2Score);
+					
+					if(!panel.components.contains(player2Hint)) {
+						panel.addComponent(player2Hint);
+						panel.components.remove(player2Hintlbl);
+					}
+					
 					vsPc = false;
 					warning.setText("game reseted press on any column to add X");
 
 				} else {
-					warning.setFont(new Font("Verdana", Font.PLAIN, 12));
-					warning.setText("you are playing VS computer choose X or O");
+					warning.setFont(new Font("Verdana", 0, 12));
+					warning.setText("game reseted press on any column to add X");
+					
 					canvas.clearCanvas();
 					vsPc = true;
 					
-					aiLevel = new AILevel();
+					AILevel.xPressed = false;
+					AILevel.oPressed = false;
+					
+					AILevel.loseScore = 0;
+					AILevel.winScore = 0;
+					aiLevel.player1Score.setText("player1's score is : " + AILevel.winScore + " | " + AILevel.loseScore);
+
+					if(!panel.components.contains(aiLevel.xRadiobtn)) {
+						panel.addComponent(aiLevel.xRadiobtn);
+						panel.addComponent(aiLevel.xRadiobtn.label);
+					}
+					if(!panel.components.contains(aiLevel.oRadiobtn)) {
+						panel.addComponent(aiLevel.oRadiobtn);
+						panel.addComponent(aiLevel.oRadiobtn.label);
+					}
+					aiLevel.xRadiobtn.setColor(0xaaaaaa);
+					aiLevel.oRadiobtn.setColor(0xaaaaaa);
+					for (int i = 0; i < canvas.columns.size(); i++) {
+						canvas.columns.get(i).pc = true;
+					}
 				}
-				warning.setFont(new Font("Verdana", 0, 12));
-				warning.setText("game reseted press on any column to add X");
 			}
 		});
 		reset.setButtonListener(new UIButtonListener() {
@@ -208,13 +247,23 @@ public class LevelManager {
 		hintPressed = ImageUtils.changeBrightness(hint, 100);
 		player1Hint = new UIButton(new Vector2i(100, 70), hint, new UIActionListener() {
 			public void perform() {
-				if(!canvas.columns.get(0).pc && PlayingCanvas.columnClicks % 2 == 0) {
-					warning.setText("press on the yellow column");
-					panel.components.remove(player1Hint);
-					panel.addComponent(player1Hintlbl);
-					hint();
-				}else
-					warning.setText("press your own hint");
+				if(!vsPc) {
+					if(!canvas.columns.get(0).pc && PlayingCanvas.columnClicks % 2 == 0) {
+						warning.setText("press on the yellow column");
+						panel.components.remove(player1Hint);
+						panel.addComponent(player1Hintlbl);
+						hint();
+					}else
+						warning.setText("press your own hint");
+				}else {
+					if(!canvas.columns.get(0).pc) {
+						warning.setText("press on the yellow column");
+						panel.components.remove(player1Hint);
+						panel.addComponent(player1Hintlbl);
+						hint();
+					}else
+						warning.setText("wait for computer to play");
+				}
 			}
 		});
 		player1Hint.setButtonListener(new UIButtonListener() {
@@ -343,16 +392,25 @@ public class LevelManager {
 	public void win(Column start, Column middle, Column end, String XO) {
 		// canvas
 		win = true;
-
-		start.setColor(0);
-		middle.setColor(0);
-		end.setColor(0);
-
+		
+		if(vsPc) {
+			for(int i = 0; i < canvas.columns.size(); i++) {
+				if(canvas.columns.get(i) == start || canvas.columns.get(i) == middle || canvas.columns.get(i) == end)
+					canvas.columns.get(i).setColor(0);
+				else
+					canvas.columns.get(i).setColor(0xffffff);
+			}
+		}else {
+			start.setColor(0);
+			middle.setColor(0);
+			end.setColor(0);
+		}
+				
 		String text = "";
 		int randomNumber = random.nextInt(4);
 
 		if (XO == "X") {
-			if (!vsPc || (vsPc && ai.xPressed)) {
+			if (!vsPc || (vsPc && AILevel.xPressed)) {
 				switch (randomNumber) {
 				case 0:
 					text = "Good!";
@@ -367,7 +425,7 @@ public class LevelManager {
 					text = "Nice job";
 					break;
 				}
-			} else if (vsPc && ai.oPressed) {
+			} else if (vsPc && AILevel.oPressed) {
 				switch (randomNumber) {
 				case 0:
 					text = "you lost";
@@ -383,10 +441,8 @@ public class LevelManager {
 					break;
 				}
 			}
-		}
-		
-		if (XO == "O") {
-			if (!vsPc || (vsPc && ai.oPressed)) {
+		}else if (XO == "O") {
+			if (!vsPc || (vsPc && AILevel.oPressed)) {
 				switch (randomNumber) {
 				case 0:
 					text = "Good!";
@@ -401,7 +457,7 @@ public class LevelManager {
 					text = "Nice job";
 					break;
 				}
-			} else if (vsPc && ai.xPressed) {
+			} else if (vsPc && AILevel.xPressed) {
 				switch (randomNumber) {
 				case 0:
 					text = "you lost";
@@ -424,27 +480,27 @@ public class LevelManager {
 		if (XO == "X") {
 			if (!vsPc) {
 				player1Score++;
-				player1Win.setText("player1's score is : " + player1Score / 2);
+				player1Win.setText("player1's score is : " + player1Score);
 			} else if (vsPc) {
-				if (ai.xPressed) {
-					aiLevel.winScore++;
-					aiLevel.player1Score.setText("player1's score is : " + aiLevel.winScore + " | " + aiLevel.loseScore / 2);
-				} else if (ai.oPressed) {
-					aiLevel.loseScore++;
-					aiLevel.player1Score.setText("player1's score is : " + aiLevel.winScore + " | " + aiLevel.loseScore / 2);
+				if (AILevel.xPressed) {
+					AILevel.winScore++;
+					aiLevel.player1Score.setText("player1's score is : " + AILevel.winScore + " | " + AILevel.loseScore);
+				} else if (AILevel.oPressed) {
+					AILevel.loseScore++;
+					aiLevel.player1Score.setText("player1's score is : " + AILevel.winScore + " | " + AILevel.loseScore);
 				}
 			}
 		} else if (XO == "O") {
 			if (!vsPc) {
 				player2Score++;
-				player2Win.setText("player2's score is : " + player2Score / 2);
+				player2Win.setText("player2's score is : " + player2Score);
 			} else if (vsPc) {
-				if (ai.oPressed) {
-					aiLevel.winScore++;
-					aiLevel.player1Score.setText("player1's score is : " + aiLevel.winScore + " | " + aiLevel.loseScore / 2);
-				} else if (ai.xPressed) {
-					aiLevel.loseScore++;
-					aiLevel.player1Score.setText("player1's score is : " + aiLevel.winScore + " | " + aiLevel.loseScore / 2);
+				if (AILevel.oPressed) {
+					AILevel.winScore++;
+					aiLevel.player1Score.setText("player1's score is : " + AILevel.winScore + " | " + AILevel.loseScore);
+				} else if (AILevel.xPressed) {
+					AILevel.loseScore++;
+					aiLevel.player1Score.setText("player1's score is : " + AILevel.winScore + " | " + AILevel.loseScore);
 				}
 			}
 		}
@@ -453,9 +509,14 @@ public class LevelManager {
 		warning.setText("press (clear) button to start a new round");
 	}
 	
-	public void hint() {
+	public Column hint() {
 		ai.hint = true;
 		ai.pcPlay();
+		for(int i = 0; i < canvas.columns.size(); i++) {
+			if(canvas.columns.get(i).getColor() == 0xffff00)
+				return canvas.columns.get(i);
+		}
+		return canvas.columns.get(0);
 	}
 
 	public void addPanel(UIPanel panel) {

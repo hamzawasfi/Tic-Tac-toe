@@ -13,19 +13,23 @@ import Gaame.graphics.level.LevelManager;
 
 public class AILevel {
 
-	public int winScore = 0;
-	public int loseScore = 0;
+	public static boolean xPressed = false;
+	public static boolean oPressed = false;
+	
+	public static int winScore = 0;
+	public static int loseScore = 0;
 
 	private LevelManager level;
 	private AI ai;
 	
 	public UIButton xRadiobtn, oRadiobtn, multiPlayerbtn;
 	public UILabel player1Score;
-
+	
 	public AILevel() {
 		level = Game.getLevel();
+		
 		ai = new AI();
-		level.vsPc = true;
+		Game.getLevel().vsPc = true;
 		
 		for (int i = 0; i < level.canvas.columns.size(); i++) {
 			level.canvas.columns.get(i).pc = true;
@@ -69,88 +73,102 @@ public class AILevel {
 		xRadiobtn = new UIButton(new Vector2i(100, 180), new Vector2i(30, 30), new UIActionListener() {
 			public void perform() {
 				level.warning.setText("click on an column to add X");
+				System.out.println("o : " + oPressed);
+				System.out.println("x : " + xPressed);
 			}
 		});
 		xRadiobtn.setButtonListener(new UIButtonListener() {
 			public void pressed(UIButton button) {
 				button.setColor(0xaa2222);
-				ai.oPressed = false;
-				ai.xPressed = true;
-				level.panel.components.remove(oRadiobtn);
-				level.panel.components.remove(oRadiobtn.label);
+				oPressed = false;
+				xPressed = true;
+				while(level.panel.components.contains(oRadiobtn) || level.panel.components.contains(oRadiobtn.label)) {
+					level.panel.components.remove(oRadiobtn);
+					level.panel.components.remove(oRadiobtn.label);
+				}
 			}
 
 			public void released(UIButton button) {
-				if (ai.xPressed)
-					button.setColor(0xaa2222);
+				if (xPressed)
+					xRadiobtn.setColor(0xaa2222);
 				else
-					button.setColor(0x555555);
+					xRadiobtn.setColor(0x555555);
 			}
 
 			public void exited(UIButton button) {
-				if (ai.xPressed)
-					button.setColor(0xaa2222);
+				if (xPressed)
+					xRadiobtn.setColor(0xaa2222);
 				else
-					button.setColor(0xaaaaaa);
+					xRadiobtn.setColor(0xaaaaaa);
 			}
 
 			public void entered(UIButton button) {
-				button.setColor(0x555555);
+				if (xPressed)
+					xRadiobtn.setColor(0xaa2222);
+				else
+					xRadiobtn.setColor(0x555555);
 			}
 		});
 		xRadiobtn.setText("X");
-		level.panel.addComponent(xRadiobtn);
+		if(!level.panel.components.contains(xRadiobtn))
+			level.panel.addComponent(xRadiobtn);
 
 		oRadiobtn = new UIButton(new Vector2i(160, 180), new Vector2i(30, 30), new UIActionListener() {
 			public void perform() {
 				level.warning.setText("click on an column to add O");
+				
 			}
 		});
 		oRadiobtn.setButtonListener(new UIButtonListener() {
 			public void pressed(UIButton button) {
 				button.setColor(0xaa2222);
-				ai.oPressed = true;
-				ai.xPressed = false;
-				level.panel.components.remove(xRadiobtn);
-				level.panel.components.remove(xRadiobtn.label);
+				oPressed = true;
+				xPressed = false;
+				while(level.panel.components.contains(xRadiobtn) || level.panel.components.contains(xRadiobtn.label)) {
+					level.panel.components.remove(xRadiobtn);
+					level.panel.components.remove(xRadiobtn.label);
+				}
 			}
 
 			public void released(UIButton button) {
-				if (ai.oPressed)
-					button.setColor(0xaa2222);
+				if (oPressed)
+					oRadiobtn.setColor(0xaa2222);
 				else
-					button.setColor(0x555555);
+					oRadiobtn.setColor(0x555555);
 			}
 
 			public void exited(UIButton button) {
-				if (ai.oPressed)
-					button.setColor(0xaa2222);
+				if (oPressed)
+					oRadiobtn.setColor(0xaa2222);
 				else
-					button.setColor(0xaaaaaa);
+					oRadiobtn.setColor(0xaaaaaa);
 			}
 
 			public void entered(UIButton button) {
-				button.setColor(0x555555);
+				if (oPressed)
+					oRadiobtn.setColor(0xaa2222);
+				else
+					oRadiobtn.setColor(0x555555);
 			}
 		});
 		oRadiobtn.setText("O");
-		level.panel.addComponent(oRadiobtn);
+		if(!level.panel.components.contains(oRadiobtn))
+			level.panel.addComponent(oRadiobtn);
 	}
 
 	public void update() {
 		if (!level.win) {
-			if (ai.xPressed) {
+			if (xPressed) {
 				if (PlayingCanvas.columnClicks % 2 == 0)
 					ai.PlayerPlay();
-				else
+				else 
 					ai.pcPlay();
-			} else if (ai.oPressed) {
+			} else if (oPressed) {
 				if (PlayingCanvas.columnClicks % 2 != 0)
 					ai.PlayerPlay();
-				else
+				else 
 					ai.pcPlay();
 			}
 		}
-
 	}
 }

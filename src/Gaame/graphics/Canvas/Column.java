@@ -8,6 +8,7 @@ import java.awt.Rectangle;
 import java.awt.event.MouseEvent;
 
 import Gaame.Game;
+import Gaame.AI.AILevel;
 import Gaame.Utils.Vector2i;
 import Gaame.inputs.Mouse;
 
@@ -25,8 +26,8 @@ public class Column extends PlayingCanvas {
 	public boolean clicked = false;
 	public boolean pc = false;
 
-	int xp, yp, size;
-	int color = 0xffffff;
+	private int xp, yp, size;
+	private int color = 0xffffff;
 
 	public Column(int xp, int yp, int size, ColumnActionListener actionListener) {
 		super(xp, yp, size);
@@ -39,6 +40,10 @@ public class Column extends PlayingCanvas {
 
 	public void setColor(int color) {
 		this.color = color;
+	}
+	
+	public int getColor() {
+		return color;
 	}
 
 	public void setChar(String XO) {
@@ -90,7 +95,7 @@ public class Column extends PlayingCanvas {
 					columnListener.pressed(this);
 				else {
 					if(PlayingCanvas.columnClicks == 0)
-						if(!Game.getLevel().ai.xPressed && !Game.getLevel().ai.oPressed && Game.getLevel().vsPc)
+						if(!AILevel.xPressed && !AILevel.oPressed && Game.getLevel().vsPc)
 							Game.getLevel().warning.setText("choose X or O first");
 						else
 							Game.getLevel().warning.setText("wait for the computer to play");

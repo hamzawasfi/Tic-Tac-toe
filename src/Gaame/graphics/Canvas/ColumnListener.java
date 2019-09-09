@@ -19,8 +19,10 @@ public class ColumnListener {
 		Game.getLevel().warning.setText("you can't change this column");
 		if (!Game.getLevel().win)
 			column.setColor(0xffffff);
-		else
-			column.setColor(0);
+		else {
+			if(!Game.getLevel().vsPc)
+				column.setColor(0);
+		}
 	}
 
 	public void pressed(Column column) {
@@ -37,13 +39,6 @@ public class ColumnListener {
 		if (PlayingCanvas.columnClicks > 8) {
 			if (!Game.getLevel().win)
 				column.clearCanvas();
-		}
-		if (PlayingCanvas.columnClicks > 4) {
-			Game.getLevel().checkWin();
-		}
-		if (PlayingCanvas.columnClicks > 8) {
-			if (!Game.getLevel().win)
-				Game.getLevel().canvas.clearCanvas();
 		}
 		if (!column.pc)
 			column.setColor(0xeeeeee);
